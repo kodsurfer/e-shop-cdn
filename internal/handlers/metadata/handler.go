@@ -31,7 +31,7 @@ func NewMetadataHandler(
 func (h *MetadataHandler) Handle(c *fiber.Ctx) error {
 	resp := core_dtos.NewResp(core_dtos.WithOldContext(c))
 
-	query := dtos.FileQueryDto{
+	query := &dtos.FileQueryDto{
 		Filename: c.Params("filename"),
 	}
 

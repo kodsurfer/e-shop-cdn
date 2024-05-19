@@ -135,7 +135,7 @@ func (h *UploadHandler) Handle(c *fiber.Ctx) error {
 			defer mu.Unlock()
 			rf = append(rf, fp)
 
-			h.pubsub.Publish(fileWrapper.DirPrefix(), "ADDED")
+			h.pubsub.Publish([]string{fileWrapper.DirPrefix()}, "ADDED")
 		}(resp, file)
 	}
 

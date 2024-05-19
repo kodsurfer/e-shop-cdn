@@ -1,63 +1,50 @@
 package pubsub
 
 import (
-	"fmt"
-	"sync"
+	"github.com/WildEgor/e-shop-gopack/pkg/libs/logger/models"
+	"log/slog"
 )
 
 var _ IPubSub = (*PubSub)(nil)
 
-// Subscribers map of subs like map[id:Subscriber]
-type Subscribers map[string]*Subscriber
-
-// Topics map of sub's topics like map[topic:map[id:Subscriber]]
-type Topics map[string]Subscribers
-
 // PubSub implement abstraction for notifications
 type PubSub struct {
-	subs   Subscribers
-	topics Topics
-
-	mu sync.RWMutex
+	subs   safePubSubs
+	topics safePubTopics
 }
 
 // NewPubSub create default PubSub
 func NewPubSub() *PubSub {
 	return &PubSub{
-		subs:   make(Subscribers),
-		topics: make(Topics),
+		subs: safePubSubs{
+			subs: make(Subscribers),
+		},
+		topics: safePubTopics{
+			topics: make(Topics),
+		},
 	}
 }
 
 // AddSubscriber by unique id (for example, ws for connection could be "conn_id:user_id")
 func (b *PubSub) AddSubscriber(conn *SubscriberConnectionOpts) *Subscriber {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
 	s := NewSubscriber(conn)
-
-	b.subs[s.GetSubID()] = s
-
+	b.subs.set(s)
 	return s
 }
 
 // RemoveSubscriber remove by unique id
 func (b *PubSub) RemoveSubscriber(conn *SubscriberConnectionOpts) *Subscriber {
-	s, ok := b.subs[conn.GetSubID()]
-	if !ok {
+	s := b.subs.get(conn.GetSubID())
+	if s == nil {
 		return nil
 	}
 
-	for topic := range s.topics {
-		b.Unsub([]string{topic}, &SubscriberConnectionOpts{
-			CID: s.GetID(),
-			UID: s.GetUID(),
-		})
-	}
+	b.subs.delete(s)
 
-	b.mu.Lock()
-	delete(b.subs, s.GetSubID())
-	b.mu.Unlock()
+	b.Unsub(s.topics.all(), &SubscriberConnectionOpts{
+		CID: s.GetID(),
+		UID: s.GetUID(),
+	})
 
 	s.Destroy()
 
@@ -66,71 +53,54 @@ func (b *PubSub) RemoveSubscriber(conn *SubscriberConnectionOpts) *Subscriber {
 
 // CountTopicSubscribers count of active topic subs
 func (b *PubSub) CountTopicSubscribers(topic string) int {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	return len(b.topics[topic])
+	return b.topics.count(topic)
 }
 
 // Sub user to topic
 func (b *PubSub) Sub(topics []string, conn *SubscriberConnectionOpts) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	s, ok := b.subs[conn.GetSubID()]
-	if !ok {
+	s := b.subs.get(conn.GetSubID())
+	if s == nil {
 		return
 	}
 
 	s.AddTopics(topics)
 
 	for _, topic := range topics {
-		if b.topics[topic] == nil {
-			b.topics[topic] = Subscribers{}
-		}
+		slog.Debug("subscriber subs to topic", models.LogEntryAttr(&models.LogEntry{
+			Props: map[string]interface{}{
+				"sid":   s.GetSubID(),
+				"topic": topic,
+			},
+		}))
 
-		b.topics[topic][conn.GetSubID()] = s
-
-		fmt.Printf("%s Subscribed for topic: %s\n", s.GetSubID(), topic)
+		b.topics.addSubIfNotExists(topic, s)
 	}
 }
 
 // Unsub user to topic
 func (b *PubSub) Unsub(topics []string, conn *SubscriberConnectionOpts) {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	s, ok := b.subs[conn.GetSubID()]
-	if !ok {
+	s := b.subs.get(conn.GetSubID())
+	if s == nil {
 		return
 	}
 
 	for _, topic := range topics {
-		delete(b.topics[topic], s.GetSubID())
+		slog.Debug("unsub sub for topic", models.LogEntryAttr(&models.LogEntry{
+			Props: map[string]interface{}{
+				"sid":   s.GetSubID(),
+				"topic": topic,
+			},
+		}))
+
+		b.topics.removeSub(topic, s)
 		s.RemoveTopic(topic)
-		fmt.Printf("%s Unsubscribed for topic: %s\n", s.GetSubID(), topic)
 	}
 }
 
 // Publish text message to topic
-func (b *PubSub) Publish(topic string, msg string) {
-	b.mu.RLock()
-	bTopics := b.topics[topic]
-	b.mu.RUnlock()
-
-	for _, s := range bTopics {
-		m := NewMessage(msg, topic)
-
-		go (func(s *Subscriber) {
-			s.Notify(m)
-		})(s)
-	}
-}
-
-// Broadcast publish msg to topics
-func (b *PubSub) Broadcast(topics []string, msg string) {
+func (b *PubSub) Publish(topics []string, msg string) {
 	for _, topic := range topics {
-		for _, s := range b.topics[topic] {
+		for _, s := range b.topics.subs(topic) {
 			m := NewMessage(msg, topic)
 
 			go (func(s *Subscriber) {
@@ -138,4 +108,9 @@ func (b *PubSub) Broadcast(topics []string, msg string) {
 			})(s)
 		}
 	}
+}
+
+// Broadcast publish msg to all
+func (b *PubSub) Broadcast(msg string) {
+	// TODO
 }

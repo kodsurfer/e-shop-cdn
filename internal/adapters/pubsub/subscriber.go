@@ -2,7 +2,8 @@ package pubsub
 
 import (
 	"fmt"
-	"sync"
+	"github.com/WildEgor/e-shop-gopack/pkg/libs/logger/models"
+	"log/slog"
 )
 
 var _ ISubscriber = (*Subscriber)(nil)
@@ -31,10 +32,8 @@ type Subscriber struct {
 	online bool
 	/* onNotify handler for notifications */
 	onNotify OnNotifyFn
-
-	mu sync.RWMutex
 	/* topics keep tracking subscribed topics */
-	topics map[string]struct{}
+	topics safeTopics
 }
 
 // NewSubscriber create new default subscriber
@@ -42,7 +41,9 @@ func NewSubscriber(conn *SubscriberConnectionOpts) *Subscriber {
 	return &Subscriber{
 		conn:     conn,
 		messages: make(chan *Message),
-		topics:   make(map[string]struct{}),
+		topics: safeTopics{
+			topics: make(map[string]struct{}),
+		},
 		online:   true,
 		onNotify: func(conn *SubscriberConnectionOpts, msg *Message) {},
 	}
@@ -63,63 +64,41 @@ func (s *Subscriber) GetUID() string {
 	return s.conn.UID
 }
 
-// GetID return conn id
+// GetID return topics id
 func (s *Subscriber) GetID() string {
 	return s.conn.GetSubID()
 }
 
 // AddTopic sub to topic
 func (s *Subscriber) AddTopic(topic string) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	s.topics[topic] = struct{}{}
+	s.topics.set(topic)
 }
 
 // AddTopics sub to topics
 func (s *Subscriber) AddTopics(topics []string) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	for _, topic := range topics {
-		s.topics[topic] = struct{}{}
+		s.topics.set(topic)
 	}
 }
 
 // RemoveTopic unsub topic
 func (s *Subscriber) RemoveTopic(topic string) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	delete(s.topics, topic)
+	s.topics.delete(topic)
 }
 
 // GetTopics return all topics
 func (s *Subscriber) GetTopics() []string {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	topics := make([]string, 0)
-	for topic, _ := range s.topics {
-		topics = append(topics, topic)
-	}
-
-	return topics
+	return s.topics.all()
 }
 
 // Destroy clear sub (topics, close channels)
 func (s *Subscriber) Destroy() {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
+	s.topics.reset()
 	s.online = false
 }
 
 // Notify sub with message
 func (s *Subscriber) Notify(msg *Message) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	if s.online {
 		s.messages <- msg
 	}
@@ -131,7 +110,15 @@ func (s *Subscriber) Listen() {
 		select {
 		case msg, ok := <-s.messages:
 			if ok {
-				fmt.Printf("Subscriber conn id %s / uid %s, received: %s from topic: %s\n", s.conn.CID, s.conn.UID, msg.GetMessagePayload(), msg.GetTopic())
+				slog.Debug("subscriber message", models.LogEntryAttr(&models.LogEntry{
+					Props: map[string]interface{}{
+						"cid":     s.conn.CID,
+						"uid":     s.conn.UID,
+						"topic":   msg.topic,
+						"payload": msg.payload,
+					},
+				}))
+				
 				s.onNotify(s.conn, msg)
 			} else {
 				break

@@ -25,6 +25,7 @@ func (h *WSConnectHandler) Handle(p *ws.EventPayload) {
 		slog.Error("fail get topics", models.LogEntryAttr(&models.LogEntry{
 			Err: err,
 		}))
+		p.Conn.Close()
 		return
 	}
 

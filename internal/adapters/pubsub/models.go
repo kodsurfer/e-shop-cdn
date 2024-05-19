@@ -7,8 +7,8 @@ type IPubSub interface {
 	CountTopicSubscribers(topic string) int
 	Sub(topics []string, conn *SubscriberConnectionOpts)
 	Unsub(topics []string, conn *SubscriberConnectionOpts)
-	Publish(topic string, msg string)
-	Broadcast(topics []string, msg string)
+	Publish(topic []string, msg string)
+	Broadcast(msg string)
 }
 
 // ISubscriber represents topic(-s) subscriber

@@ -16,24 +16,24 @@ type safePool struct {
 
 func (p *safePool) set(ws IClient) {
 	p.Lock()
+	defer p.Unlock()
 	p.conn[ws.GetID()] = ws
-	p.Unlock()
 }
 
 func (p *safePool) all() map[string]IClient {
 	p.RLock()
+	defer p.RUnlock()
 	ret := make(map[string]IClient, 0)
 	for wsUUID, kws := range p.conn {
 		ret[wsUUID] = kws
 	}
-	p.RUnlock()
 	return ret
 }
 
 func (p *safePool) get(key string) (IClient, error) {
 	p.RLock()
+	defer p.RUnlock()
 	ret, ok := p.conn[key]
-	p.RUnlock()
 	if !ok {
 		return nil, errors.New("invalid conn")
 	}
@@ -42,22 +42,22 @@ func (p *safePool) get(key string) (IClient, error) {
 
 func (p *safePool) contains(key string) bool {
 	p.RLock()
+	defer p.RUnlock()
 	_, ok := p.conn[key]
-	p.RUnlock()
 	return ok
 }
 
 func (p *safePool) delete(key string) {
 	p.Lock()
+	defer p.Unlock()
 	delete(p.conn, key)
-	p.Unlock()
 }
 
 //nolint:all
 func (p *safePool) reset() {
 	p.Lock()
+	defer p.Unlock()
 	p.conn = make(map[string]IClient)
-	p.Unlock()
 }
 
 // safeListeners hub event handlers
@@ -68,8 +68,8 @@ type safeListeners struct {
 
 func (l *safeListeners) set(event string, callback HubHandlerFn) {
 	l.Lock()
+	defer l.Unlock()
 	l.list[event] = append(l.list[event], callback)
-	l.Unlock()
 }
 
 func (l *safeListeners) get(event string) []HubHandlerFn {

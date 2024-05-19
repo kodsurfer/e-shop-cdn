@@ -19,22 +19,20 @@ func NewGetFilesHandler(
 	}
 }
 
-// Show files godoc
-//
+// Handle Show files godoc
 // @Summary Allow get paginated files
-//
-//	@Description	show paginated files
-//	@Tags			Files Controller
-//	@Accept			json
-//	@Produce		json
-//	@Param			x-api-key header	string	true	"123"
-//	@Param			page	query		int	false	"Page"
-//	@Param			limit	query		int	false	"Page"
-//	@Router			/api/v1/cdn/files [post]
+// @Description	show paginated files
+// @Tags			Files Controller
+// @Accept			json
+// @Produce		json
+// @Param			x-api-key header	string	true	"123"
+// @Param			page	query		int	false	"Page"
+// @Param			limit	query		int	false	"Page"
+// @Router			/api/v1/cdn/files [post]
 func (h *GetFilesHandler) Handle(c *fiber.Ctx) error {
 	resp := core_dtos.NewResp(core_dtos.WithOldContext(c))
 
-	query := dtos.PaginationQueryDto{
+	query := &dtos.PaginationQueryDto{
 		Page:  c.Query("page", "1"),
 		Limit: c.Query("limit", "10"),
 	}
@@ -44,7 +42,7 @@ func (h *GetFilesHandler) Handle(c *fiber.Ctx) error {
 		return resp.JSON()
 	}
 
-	opts := dtos.FromPaginationQueryDtoToPaginationOpts(&query)
+	opts := dtos.FromPaginationQueryDtoToPaginationOpts(query)
 
 	pf, err := h.fr.PaginateFiles(opts)
 	if err != nil {

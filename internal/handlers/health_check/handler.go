@@ -20,6 +20,6 @@ func NewHealthCheckHandler() *HealthCheckHandler {
 // @Success			200
 // @Router			/api/v1/livez [get]
 func (hch *HealthCheckHandler) Handle(ctx *fiber.Ctx) error {
-	// TODO: Add own checks
+	// TODO: Add own checks for example ping s3 and mongodb
 	return nil
 }

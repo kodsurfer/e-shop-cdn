@@ -7,7 +7,6 @@ import (
 	get_files_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/get_files"
 	health_check_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/health_check"
 	metadata_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/metadata"
-	ping_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/ping"
 	ready_check_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/ready_check"
 	ticker_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/ticker"
 	upload_handler "github.com/WildEgor/e-shop-cdn/internal/handlers/upload"
@@ -39,6 +38,5 @@ var HandlersSet = wire.NewSet(
 	ws_disconnect_handler.NewWSDisconnectHandler,
 
 	// HINT: for testing only
-	ping_handler.NewPingHandler,
 	ticker_handler.NewTickerHandler,
 )

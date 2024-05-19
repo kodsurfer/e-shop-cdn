@@ -26,19 +26,20 @@ func NewDeleteHandler(
 	}
 }
 
-// Delete file 		godoc
-// @Summary 		Allow delete file
-// @Description		delete file by name
-// @Tags			Files Controller
-// @Accept			json
-// @Produce			json
-// @Param			x-api-key header	string	true	"123"
-// @Param			filename	path		string	true	"Filenam"
-// @Router			/api/v1/cdn/delete/{id} [delete]
+// Handle delete file 		godoc
+// @Summary 				Allow delete file
+// @Description				delete file by name
+// @Tags					Files Controller
+// @Accept					json
+// @Produce					json
+// @Param					x-api-key header	string	true	"123"
+// @Param					filename	path		string	true	"Filenam"
+// @Router					/api/v1/cdn/delete/{id} [delete]
 func (hch *DeleteHandler) Handle(c *fiber.Ctx) error {
 	resp := core_dtos.NewResp(core_dtos.WithOldContext(c))
 	resp.SetStatus(fiber.StatusOK)
 
+	// TODO: make dto for validation
 	id := c.Params("id")
 
 	oldFile, err := hch.fr.DeleteFileById(id)
@@ -46,9 +47,9 @@ func (hch *DeleteHandler) Handle(c *fiber.Ctx) error {
 		resp.SetStatus(fiber.StatusInternalServerError)
 	}
 
-	// TODO: remove file in another cron job using is_deleted field (prevent s3 call with mongo)
+	// TODO: remove file in another cron job using is_deleted field (prevent call s3 and mongo in same request)
 	if oldFile != nil {
-		hch.pubsub.Publish(oldFile.DirPrefix(), "DELETED")
+		hch.pubsub.Publish([]string{oldFile.DirPrefix()}, "DELETED") // for testing we use text msg
 
 		if err := hch.sa.Delete(oldFile.Name); err != nil {
 			resp.SetStatus(fiber.StatusInternalServerError)

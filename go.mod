@@ -3,7 +3,7 @@ module github.com/WildEgor/e-shop-cdn
 go 1.22.1
 
 require (
-	github.com/WildEgor/e-shop-gopack v1.3.1
+	github.com/WildEgor/e-shop-gopack v1.4.0
 	github.com/caarlos0/env/v7 v7.1.0
 	github.com/gofiber/contrib/websocket v1.3.1
 	github.com/gofiber/fiber/v2 v2.52.4

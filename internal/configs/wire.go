@@ -7,4 +7,7 @@ var ConfigsSet = wire.NewSet(
 	NewConfigurator,
 	NewAppConfig,
 	NewLoggerConfig,
+	NewMongoConfig,
+	NewStorageConfig,
+	NewApiKeyConfig,
 )

@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"time"
 
-	server "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal"
+	server "github.com/WildEgor/e-shop-cdn/internal"
 )
 
 // @title			[Service name here] Swagger Doc

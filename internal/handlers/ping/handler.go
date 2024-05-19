@@ -2,7 +2,7 @@ package ping_handler
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 	"math/rand"
 )
 
@@ -21,7 +21,7 @@ func NewPingHandler() *PingCheckHandler {
 // @Produce			json
 // @Success			200
 // @Router			/api/v1/ping [get]
-func (hch *PingCheckHandler) Handle(ctx fiber.Ctx) error {
+func (hch *PingCheckHandler) Handle(ctx *fiber.Ctx) error {
 
 	n := rand.Int()
 

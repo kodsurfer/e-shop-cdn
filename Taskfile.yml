@@ -8,6 +8,7 @@ tasks:
       - test -f docker-compose.yml
     cmd: docker-compose up -d app-dev
 
+  # Run using air
   local-dev:
     cmd: air -d
 

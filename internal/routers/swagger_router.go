@@ -1,8 +1,8 @@
 package routers
 
 import (
-	_ "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/api/swagger"
-	"github.com/gofiber/fiber/v3"
+	_ "github.com/WildEgor/e-shop-cdn/api/swagger"
+	"github.com/gofiber/fiber/v2"
 )
 
 type SwaggerRouter struct {

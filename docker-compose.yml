@@ -3,8 +3,8 @@ version: "3.8"
 services:
 # Development container.
 # Runs in debug mode and live-reloading on every source file update.
-  app-dev:
-    hostname: app-dev
+  e-shop-cdn:
+    hostname: e-shop-cdn
     restart: unless-stopped
     build:
 # if use private libs uncomment this
@@ -13,9 +13,11 @@ services:
       context: ./
       dockerfile: Dockerfile
       target: dev
+    # command: tail -f /dev/null # for debug only
     env_file:
-      - .env
+      - .env.docker # separate configs
     volumes:
-      - ./:/app
+      - ./:/srv # for dev target only
+      # - .env:/srv/.env # for production target only
     ports:
       - 8888:${APP_PORT}

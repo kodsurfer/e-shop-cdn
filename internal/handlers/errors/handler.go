@@ -2,7 +2,7 @@ package error_handler
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 // ErrorsHandler acts like global error handler
@@ -13,7 +13,7 @@ func NewErrorsHandler() *ErrorsHandler {
 	return &ErrorsHandler{}
 }
 
-func (hch *ErrorsHandler) Handle(ctx fiber.Ctx, err error) error {
+func (hch *ErrorsHandler) Handle(ctx *fiber.Ctx, err error) error {
 	sc := fiber.StatusInternalServerError
 	var e *fiber.Error
 	if errors.As(err, &e) {

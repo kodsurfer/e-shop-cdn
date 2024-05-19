@@ -1,11 +1,11 @@
 <h1 align="center"> eShop - CDN </h1> <br>
 <div>
     <img src="assets/logo.png" width="250" height="200" style="display: block;margin-left: auto;margin-right: auto;>
+    <hr>
+    <p align="center">
+      Microservice provide file(s) storage (S3) with real-time subscriptions
+    </p>
 </div>
-<hr>
-<p align="center">
-  Microservice provide file(s) storage (S3) with real-time subscriptions
-</p>
 <hr>
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)

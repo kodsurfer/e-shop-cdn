@@ -6,7 +6,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     preconditions:
       - test -f docker-compose.yml
-    cmd: docker-compose up -d app-dev
+    cmd: docker-compose up -d e-shop-cdn
 
   # Run using air
   local-dev:

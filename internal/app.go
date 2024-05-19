@@ -3,13 +3,18 @@ package pkg
 import (
 	"context"
 	"fmt"
-	"github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/configs"
-	eh "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/handlers/errors"
-	nfm "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/middlewares/not_found"
-	"github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/routers"
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/recover"
+	"github.com/WildEgor/e-shop-cdn/internal/adapters"
+	"github.com/WildEgor/e-shop-cdn/internal/adapters/ws"
+	"github.com/WildEgor/e-shop-cdn/internal/configs"
+	"github.com/WildEgor/e-shop-cdn/internal/db"
+	mongo "github.com/WildEgor/e-shop-cdn/internal/db/mongo"
+	eh "github.com/WildEgor/e-shop-cdn/internal/handlers/errors"
+	nfm "github.com/WildEgor/e-shop-cdn/internal/middlewares/not_found"
+	ws_middleware "github.com/WildEgor/e-shop-cdn/internal/middlewares/ws"
+	"github.com/WildEgor/e-shop-cdn/internal/routers"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html/v2"
 	"github.com/google/wire"
 	"log/slog"
@@ -19,14 +24,18 @@ import (
 
 // AppSet link main app deps
 var AppSet = wire.NewSet(
-	NewApp,
 	configs.ConfigsSet,
+	db.DbSet,
+	adapters.AdaptersSet,
 	routers.RouterSet,
+	NewApp,
 )
 
 // Server represents the main server configuration.
 type Server struct {
 	App       *fiber.App
+	WS        *ws.Hub
+	Mongo     *mongo.Connection
 	AppConfig *configs.AppConfig
 }
 
@@ -34,13 +43,9 @@ type Server struct {
 func (srv *Server) Run(ctx context.Context) {
 	slog.Info("server is listening")
 
-	if err := srv.App.Listen(fmt.Sprintf(":%s", srv.AppConfig.Port), fiber.ListenConfig{
-		DisableStartupMessage: false,
-		EnablePrintRoutes:     false,
-		OnShutdownSuccess: func() {
-			slog.Debug("success shutdown service")
-		},
-	}); err != nil {
+	go srv.WS.Run()
+
+	if err := srv.App.Listen(fmt.Sprintf(":%s", srv.AppConfig.Port)); err != nil {
 		slog.Error("unable to start server")
 	}
 }
@@ -48,6 +53,9 @@ func (srv *Server) Run(ctx context.Context) {
 // Shutdown graceful shutdown
 func (srv *Server) Shutdown(ctx context.Context) {
 	slog.Info("shutdown service")
+
+	srv.WS.Stop()
+	srv.Mongo.Disconnect()
 
 	if err := srv.App.Shutdown(); err != nil {
 		slog.Error("unable to shutdown server")
@@ -57,10 +65,16 @@ func (srv *Server) Shutdown(ctx context.Context) {
 func NewApp(
 	ac *configs.AppConfig,
 	lc *configs.LoggerConfig,
+
 	eh *eh.ErrorsHandler,
+
 	prr *routers.PrivateRouter,
 	pbr *routers.PublicRouter,
 	sr *routers.SwaggerRouter,
+	wsr *routers.SocketRouter,
+
+	mongo *mongo.Connection,
+	ws *ws.Hub,
 ) *Server {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: lc.Level,
@@ -87,16 +101,20 @@ func NewApp(
 		AllowMethods: "GET,POST,HEAD,PUT,DELETE,PATCH",
 	}))
 	app.Use(recover.New())
+	app.Use("/ws", ws_middleware.NewWS())
 
 	prr.Setup(app)
 	pbr.Setup(app)
 	sr.Setup(app)
+	wsr.Setup(app)
 
 	// 404 handler
 	app.Use(nfm.NewNotFound())
 
 	return &Server{
 		App:       app,
+		WS:        ws,
+		Mongo:     mongo,
 		AppConfig: ac,
 	}
 }

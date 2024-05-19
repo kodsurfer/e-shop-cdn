@@ -2,6 +2,7 @@
 <div>
     <img src="assets/logo.png" width="250" height="200" style="display: block;margin-left: auto;margin-right: auto;>
 </div>
+<hr>
 <p align="center">
   Microservice provide file(s) storage (S3) with real-time subscriptions
 </p>

@@ -68,7 +68,7 @@ const docTemplate = `{
                 "tags": [
                     "Files Controller"
                 ],
-                "summary": "Allow \tdownload file",
+                "summary": "Allow \t\t\t\t\t\tdownload file",
                 "parameters": [
                     {
                         "type": "string",
@@ -202,26 +202,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/ping": {
-            "get": {
-                "description": "Just random return 200 OK or error",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Test Controller"
-                ],
-                "summary": "Dummy ping",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/api/v1/readyz": {
             "get": {
                 "description": "Ready check service",
@@ -251,8 +231,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8888",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "[Service name here] Swagger Doc",
-	Description:      "[Service name here]",
+	Title:            "eShopCDN Swagger Doc",
+	Description:      "eShopCDN",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

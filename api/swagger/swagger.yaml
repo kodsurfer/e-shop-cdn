@@ -5,12 +5,12 @@ info:
     email: kartashov_egor96@mail.ru
     name: mail
     url: /
-  description: '[Service name here]'
+  description: eShopCDN
   license:
     name: MIT
     url: http://www.apache.org/licenses/MIT.html
   termsOfService: /
-  title: '[Service name here] Swagger Doc'
+  title: eShopCDN Swagger Doc
   version: "1.0"
 paths:
   /api/v1/cdn/delete/{id}:
@@ -49,7 +49,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: "Allow \tdownload file"
+      summary: "Allow \t\t\t\t\t\tdownload file"
       tags:
       - Files Controller
   /api/v1/cdn/files:
@@ -134,19 +134,6 @@ paths:
       summary: Health check service
       tags:
       - Health Controller
-  /api/v1/ping:
-    get:
-      consumes:
-      - application/json
-      description: Just random return 200 OK or error
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Dummy ping
-      tags:
-      - Test Controller
   /api/v1/readyz:
     get:
       consumes:

@@ -9,7 +9,6 @@ import (
 	"github.com/WildEgor/e-shop-cdn/internal/db"
 	mongo "github.com/WildEgor/e-shop-cdn/internal/db/mongo"
 	eh "github.com/WildEgor/e-shop-cdn/internal/handlers/errors"
-	nfm "github.com/WildEgor/e-shop-cdn/internal/middlewares/not_found"
 	ws_middleware "github.com/WildEgor/e-shop-cdn/internal/middlewares/ws"
 	"github.com/WildEgor/e-shop-cdn/internal/routers"
 	"github.com/gofiber/fiber/v2"
@@ -109,7 +108,7 @@ func NewApp(
 	wsr.Setup(app)
 
 	// 404 handler
-	app.Use(nfm.NewNotFound())
+	// app.Use(nfm.NewNotFound())
 
 	return &Server{
 		App:       app,

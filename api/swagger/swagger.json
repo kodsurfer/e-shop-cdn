@@ -4,8 +4,8 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "[Service name here]",
-        "title": "[Service name here] Swagger Doc",
+        "description": "eShopCDN",
+        "title": "eShopCDN Swagger Doc",
         "termsOfService": "/",
         "contact": {
             "name": "mail",
@@ -65,7 +65,7 @@
                 "tags": [
                     "Files Controller"
                 ],
-                "summary": "Allow \tdownload file",
+                "summary": "Allow \t\t\t\t\t\tdownload file",
                 "parameters": [
                     {
                         "type": "string",
@@ -192,26 +192,6 @@
                     "Health Controller"
                 ],
                 "summary": "Health check service",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/v1/ping": {
-            "get": {
-                "description": "Just random return 200 OK or error",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Test Controller"
-                ],
-                "summary": "Dummy ping",
                 "responses": {
                     "200": {
                         "description": "OK"

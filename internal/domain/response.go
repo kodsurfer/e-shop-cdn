@@ -9,13 +9,18 @@ import (
 const defErrCode = 99
 
 var errCodesMessages = map[int]string{
-	99:  "unknown error",
+	99:  "unknown error %s",
 	100: "wrong api key",
 	101: "missing api key",
 	102: "fail serve file",
 	103: "storage error",
 	104: "file (%s) extension not allowed",
 	105: "save file error",
+}
+
+func SetUnknown(r *core_dtos.ResponseDto, error error) {
+	r.SetStatus(fiber.StatusInternalServerError)
+	r.SetError(99, fmt.Sprintf(errCodesMessages[99], error.Error()))
 }
 
 func SetFileExtErr(r *core_dtos.ResponseDto, filename string) {

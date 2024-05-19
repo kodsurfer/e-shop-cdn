@@ -9,9 +9,9 @@ import (
 	server "github.com/WildEgor/e-shop-cdn/internal"
 )
 
-// @title			[Service name here] Swagger Doc
+// @title			eShopCDN Swagger Doc
 // @version			1.0
-// @description		[Service name here]
+// @description		eShopCDN
 // @termsOfService	/
 // @contact.name	mail
 // @contact.url		/

@@ -47,11 +47,8 @@ Service allow upload multiple files to shared S3 public bucket
 
 1. Start MongoDB using [docker-compose](https://github.com/WildEgor/e-shop-dot/blob/develop/docker-compose.yaml#L130);
 2. Start Minio using [docker-compose](https://github.com/WildEgor/e-shop-dot/blob/develop/docker-compose.yaml#L162);
-3. Prepare .env file using example:
-```text
-
-```
-4. Install tools above:
+3. Prepare .env file using [example](.env.example);
+4. Install tools above;
 5. Run service using ```air``` or ```docker-compose```:
 ```shell
 task local-dev

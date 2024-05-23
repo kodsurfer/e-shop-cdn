@@ -20,3 +20,4 @@ app
 # vendor/
 
 .env
+.env.docker

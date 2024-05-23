@@ -1,8 +1,9 @@
 package error_handler
 
 import (
-	"errors"
-	"github.com/gofiber/fiber/v3"
+	domains "github.com/WildEgor/e-shop-cdn/internal/domain"
+	core_dtos "github.com/WildEgor/e-shop-gopack/pkg/core/dtos"
+	"github.com/gofiber/fiber/v2"
 )
 
 // ErrorsHandler acts like global error handler
@@ -13,16 +14,10 @@ func NewErrorsHandler() *ErrorsHandler {
 	return &ErrorsHandler{}
 }
 
-func (hch *ErrorsHandler) Handle(ctx fiber.Ctx, err error) error {
-	sc := fiber.StatusInternalServerError
-	var e *fiber.Error
-	if errors.As(err, &e) {
-		sc = e.Code
-	}
+func (hch *ErrorsHandler) Handle(ctx *fiber.Ctx, err error) error {
+	resp := core_dtos.NewResp(core_dtos.WithOldContext(ctx))
 
-	ctx.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
-	ctx.Status(sc)
+	domains.SetUnknown(resp, err)
 
-	// TODO: replace with your own structure if needed
-	return ctx.Send([]byte{})
+	return resp.JSON()
 }

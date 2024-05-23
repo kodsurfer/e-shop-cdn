@@ -1,30 +1,30 @@
 package routers
 
 import (
-	health_check_handler "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/handlers/health_check"
-	ping_handler "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/handlers/ping"
-	ready_check_handler "github.com/WildEgor/e-shop-fiber-microservice-boilerplate/internal/handlers/ready_check"
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/healthcheck"
-	"github.com/gofiber/fiber/v3/middleware/limiter"
+	dh "github.com/WildEgor/e-shop-cdn/internal/handlers/download"
+	hch "github.com/WildEgor/e-shop-cdn/internal/handlers/health_check"
+	rch "github.com/WildEgor/e-shop-cdn/internal/handlers/ready_check"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/healthcheck"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"log/slog"
 )
 
 type PublicRouter struct {
-	hch *health_check_handler.HealthCheckHandler
-	rch *ready_check_handler.ReadyCheckHandler
-	ph  *ping_handler.PingCheckHandler
+	hch *hch.HealthCheckHandler
+	rch *rch.ReadyCheckHandler
+	dwh *dh.DownloadHandler
 }
 
 func NewPublicRouter(
-	hch *health_check_handler.HealthCheckHandler,
-	rch *ready_check_handler.ReadyCheckHandler,
-	ph *ping_handler.PingCheckHandler,
+	hh *hch.HealthCheckHandler,
+	rch *rch.ReadyCheckHandler,
+	dwh *dh.DownloadHandler,
 ) *PublicRouter {
 	return &PublicRouter{
-		hch,
+		hh,
 		rch,
-		ph,
+		dwh,
 	}
 }
 
@@ -35,12 +35,13 @@ func (r *PublicRouter) Setup(app *fiber.App) {
 	}))
 	v1 := api.Group("/v1")
 
-	// TODO: use for testing only (remove it)
-	v1.Get("/ping", r.ph.Handle)
+	fc := v1.Group("/cdn")
 
-	v1.Get("/livez", healthcheck.NewHealthChecker(healthcheck.Config{
-		Probe: func(ctx fiber.Ctx) bool {
-			if err := r.hch.Handle(ctx); err != nil {
+	fc.Get("/download/:filename", r.dwh.Handle)
+
+	app.Use(healthcheck.New(healthcheck.Config{
+		LivenessProbe: func(c *fiber.Ctx) bool {
+			if err := r.hch.Handle(c); err != nil {
 				slog.Error("error not healthy")
 				return false
 			}
@@ -49,10 +50,9 @@ func (r *PublicRouter) Setup(app *fiber.App) {
 
 			return true
 		},
-	}))
-	v1.Get("/readyz", healthcheck.NewHealthChecker(healthcheck.Config{
-		Probe: func(ctx fiber.Ctx) bool {
-			if err := r.rch.Handle(ctx); err != nil {
+		LivenessEndpoint: "/api/v1/livez",
+		ReadinessProbe: func(c *fiber.Ctx) bool {
+			if err := r.rch.Handle(c); err != nil {
 				slog.Error("error not ready")
 				return false
 			}
@@ -61,5 +61,6 @@ func (r *PublicRouter) Setup(app *fiber.App) {
 
 			return true
 		},
+		ReadinessEndpoint: "/api/v1/readyz",
 	}))
 }

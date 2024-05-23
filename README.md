@@ -1,67 +1,77 @@
-# Project boilerplate: Go + Fiber + Docker + Air
-A containerised eShopFiberMicroserviceBoilerplate (mmm Java-style naming)
+<h1 align="center"> eShop - CDN </h1> <br>
+<hr>
+<div>
+    <img src="assets/logo.png" width="200" height="200" style="display: block;margin-left: auto;margin-right: auto;">
+</div>
+<p align="center">
+  Microservice provide file(s) storage (S3) with real-time subscriptions
+</p>
+<hr>
 
-| Component         | Link                                   |
-| ----------------- |----------------------------------------|
-| Language          | [Go](https://go.dev/)                  |
-| Framework         | [Fiber](https://docs.gofiber.io/)      |
-| Hot Reloading     | [Air](https://github.com/cosmtrek/air) |
-| Containerisation  | [Docker](https://www.docker.com/)      |
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Run Lint and Testing](https://github.com/WildEgor/e-shop-support-bot/actions/workflows/lint.yml/badge.svg)](https://github.com/WildEgor/e-shop-cdn/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/WildEgor/e-shop-cdn/branch/develop/graph/badge.svg)](https://codecov.io/gh/WildEgor/e-shop-cdn/branch/develop)
+[![Go Report Card](https://goreportcard.com/badge/github.com/WildEgor/e-shop-cdn)](https://goreportcard.com/report/github.com/WildEgor/e-shop-cdn)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/WildEgor/e-shop-cdn)
+[![Publish Docker image](https://github.com/WildEgor/e-shop-cdn/actions/workflows/publish.yml/badge.svg)](https://hub.docker.com/repository/docker/wildegor/e-shop-cdn)
 
-## Structure
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+- [Contributing](#contributing)
 
-- [/api](api/README.md)
-- [/assets](assets/README.md)
-- [/cmd](cmd/README.md)
-- [/internal/adapters](internal/adapters/README.md)
-- [/internal/configs](internal/configs/README.md)
-- [/internal/handlers](internal/handlers/README.md)
-- [/internal/mappers](internal/mappers/README.md)
-- [/internal/middlewares](internal/middlewares/README.md)
-- [/internal/models](internal/models/README.md)
-- [/internal/repositories](internal/repositories/README.md)
-- [/internal/routers](internal/routers/README.md)
+## Introduction
 
-## Development
+Service allow upload multiple files to shared S3 public bucket
 
-Install the dependencies:
+## Features
 
-> This project uses [Go mod](https://blog.golang.org/using-go-modules), the official module manager, to handle Go modules in a portable way without having to worry about GOPATH.
+- [x] Upload multiple files;
+- [x] Save files metadata to database;
+- [x] Delete file;
+- [x] Subscribe for files changes;
+- [] Replace file;
 
-```bash
-go mod download
-go mod vendor
-go mod verify
+## Requirements
+
+- [Git](http://git-scm.com/)
+- [Go >= 1.22](https://go.dev/dl/)
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- [Task](https://taskfile.dev/installation/)
+- [Air](https://github.com/cosmtrek/air?tab=readme-ov-file#via-go-install-recommended)
+- [MongoDB](https://www.mongodb.com/)
+
+## Quick start
+
+1. Start MongoDB using [docker-compose](https://github.com/WildEgor/e-shop-dot/blob/develop/docker-compose.yaml#L130);
+2. Start Minio using [docker-compose](https://github.com/WildEgor/e-shop-dot/blob/develop/docker-compose.yaml#L162);
+3. Prepare .env file using [example](.env.example);
+4. Install tools above;
+5. Run service using ```air``` or ```docker-compose```:
+```shell
+task local-dev
+```
+or
+```shell
+task docker-dev
 ```
 
-Define environment variables for your development environment:
+## Contributing
 
-> These are passed to the Docker container via `docker-compose.yaml` in development. When running in production, the environment variables must be passed to the container when it is run.
-
-```bash
-cp .env.example .env
+Please, use git cz for commit messages!
+```shell
+git clone https://github.com/WildEgor/e-shop-cdn
+cd e-shop-cdn
+git checkout -b feature-or-fix-branch
+git add .
+git cz
+git push --set-upstream-to origin/feature-or-fix-branch
 ```
 
-Run locally:
+## License
 
-> This builds the Docker image and runs it automatically with the config defined in `docker-compose.yaml`. This saves you having to build the docker image and then run a manual `docker run` command with all the flags (for environment variables, ports, etc).
+<p>This project is licensed under the <a href="LICENSE">MIT License</a>.</p>
 
-Local
-```bash
-task wire && air
-```
-
-Using Docker
-```bash
-docker compose up --build --remove-orphans app-dev
-```
-
-## Production
-
-> Note: Environment variables are never baked into the image, or they wouldn't be _environment_ variables. The production environment will start a Docker container based on this image, but it will have to pass the environment variables to the container when it runs it.
-
-Example manually running a container with environment variables and ports defined:
-Using Docker
-```bash
-docker compose up --build --remove-orphans app
-```
+Made with ❤️ by me
